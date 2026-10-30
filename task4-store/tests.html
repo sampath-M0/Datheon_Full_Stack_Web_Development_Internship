@@ -1,0 +1,15 @@
+<!doctype html><meta charset="utf-8"><title>Store tests</title>
+<body style="font:15px monospace;padding:20px"><h1>Store logic tests</h1><pre id="o"></pre>
+<script src="js/store.js"></script>
+<script>
+const {add,setQty,totals,luhn,norm,money}=Store;let fail=0;const o=document.getElementById('o');
+const eq=(a,b,m)=>{const ok=JSON.stringify(a)===JSON.stringify(b);if(!ok)fail++;o.textContent+=(ok?'PASS ':'FAIL ')+m+(ok?'':'  got '+JSON.stringify(a)+' expected '+JSON.stringify(b))+'\n'};
+eq(add([],1),[{id:1,qty:1}],'add new line');eq(add([{id:1,qty:1}],1),[{id:1,qty:2}],'add increments');
+eq(add([{id:1,qty:10}],1)[0].qty,10,'quantity capped at 10');eq(setQty([{id:1,qty:2}],1,0),[],'qty 0 removes line');
+eq(totals([{price:5000,qty:1}]),{sub:5000,disc:0,after:5000,ship:599,tax:400,total:5999},'subtotal + shipping + tax');
+eq(totals([{price:6000,qty:2}]).ship,0,'free shipping at $100');eq(totals([{price:5000,qty:1}],'WELCOME10').total,5459,'WELCOME10 applies');
+eq(totals([{price:3000,qty:1}],'GREEN20').disc,0,'GREEN20 needs $50 minimum');eq(totals([{price:5000,qty:1}],'FREESHIP').ship,0,'FREESHIP removes shipping');
+eq(totals([],'WELCOME10').total,0,'empty cart is zero');eq(luhn('4242424242424242'),true,'valid card passes Luhn');eq(luhn('4242424242424241'),false,'bad card fails Luhn');
+eq(norm({id:1,title:'x',price:19.99,category:"men's clothing",rating:{rate:4,count:3}}).price,1999,'price converted to cents');eq(money(1999),'$19.99','money formats cents');
+o.textContent+='\n'+(fail?fail+' FAILED':'All tests passed');
+</script>
